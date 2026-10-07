@@ -10,7 +10,7 @@ test "a document is its owner's until it is shared"
   as user $bo refused {UPDATE app.documents SET title = 'mine' WHERE id = $d}
   as user $bo refused {INSERT INTO app.documents (owner_id, title) VALUES ($ann, 'in her name')}
 
-test "shared with a person: a viewer reads, an editor writes, neither shares"
+test "shared with a person: a viewer reads, an editor writes"
   given ann = {INSERT INTO app.users VALUES (901, 'ann') RETURNING id}
   given bo = {INSERT INTO app.users VALUES (902, 'bo') RETURNING id}
   given d = {INSERT INTO app.documents (owner_id, title) VALUES ($ann, 'Plan') RETURNING id}
