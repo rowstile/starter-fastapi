@@ -25,7 +25,7 @@ jobs:
         options: --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 3s --health-retries 30
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v10
+      - uses: astral-sh/setup-uv@v10.2.0
       - run: uv lock --upgrade-package rowstile && uv sync
       - run: uv run rowstile --version
       - run: psql "postgresql://postgres:postgres@localhost:5432/postgres" -v ON_ERROR_STOP=1 -f docker/init.sql
