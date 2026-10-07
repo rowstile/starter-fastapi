@@ -1,0 +1,24 @@
+-- Who may see and change a document. Everything that grants access is in this file.
+-- After a change: rowstile check, then rowstile dev (or push and test), then rowstile migrate.
+app role starter_app
+
+type user = app.users
+
+type team = app.teams
+  member : user = app.team_members(team_id -> user_id)
+
+type document = app.documents
+  owner  : user = owner_id
+  editor : user, team#member shared  -- given with authz.share(), by whoever may share
+  viewer : user, team#member shared
+
+  can share = owner
+  can edit  = share or editor
+  can view  = edit or viewer
+
+rules app.documents
+  select          : view
+  insert          : owner
+  update          : edit
+  update owner_id : nobody
+  delete          : share

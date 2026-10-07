@@ -1,0 +1,34 @@
+# Every Monday: the starter against the newest rowstile release, so a release that breaks it is seen here
+# first. It doesn't change the repository: a red run is the signal to look.
+name: weekly
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+
+env:
+  ROWSTILE_OWNER_DSN: postgresql://starter_owner:owner@localhost:5432/starter
+  ROWSTILE_OWNER_URL: postgresql+psycopg://starter_owner:owner@localhost:5432/starter
+  ROWSTILE_APP_URL: postgresql+asyncpg://starter_app:app@localhost:5432/starter
+
+jobs:
+  newest:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 3s --health-retries 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+      - run: uv lock --upgrade-package rowstile && uv sync
+      - run: uv run rowstile --version
+      - run: psql "postgresql://postgres:postgres@localhost:5432/postgres" -v ON_ERROR_STOP=1 -f docker/init.sql
+      - run: uv run alembic upgrade head
+      - run: uv run rowstile test
+      - run: uv run pytest -q

@@ -1,0 +1,37 @@
+-- The policy's tests. Each brings its own rows and is rolled back. rowstile test (or rowstile dev) runs them.
+
+test "a document is its owner's until it is shared"
+  given ann = {INSERT INTO app.users VALUES (901, 'ann') RETURNING id}
+  given bo = {INSERT INTO app.users VALUES (902, 'bo') RETURNING id}
+  given d = {INSERT INTO app.documents (owner_id, title) VALUES ($ann, 'Plan') RETURNING id}
+  user $ann can share document $d
+  user $bo cannot view document $d
+  as user $bo sees 0 {SELECT FROM app.documents WHERE id = $d}
+  as user $bo refused {UPDATE app.documents SET title = 'mine' WHERE id = $d}
+  as user $bo refused {INSERT INTO app.documents (owner_id, title) VALUES ($ann, 'in her name')}
+
+test "shared with a person: a viewer reads, an editor writes, neither shares"
+  given ann = {INSERT INTO app.users VALUES (901, 'ann') RETURNING id}
+  given bo = {INSERT INTO app.users VALUES (902, 'bo') RETURNING id}
+  given d = {INSERT INTO app.documents (owner_id, title) VALUES ($ann, 'Plan') RETURNING id}
+  as user $ann allowed {SELECT authz.share('document', $d, 'viewer', 'user', $bo)}
+  user $bo can view document $d
+  as user $bo refused {UPDATE app.documents SET title = 'mine' WHERE id = $d}
+  as user $ann allowed {SELECT authz.share('document', $d, 'editor', 'user', $bo)}
+  as user $bo allowed {UPDATE app.documents SET title = 'ours' WHERE id = $d}
+  as user $bo refused {SELECT authz.share('document', $d, 'viewer', 'user', $bo)}
+  as user $bo refused {DELETE FROM app.documents WHERE id = $d}
+  as user $bo refused {UPDATE app.documents SET owner_id = $bo WHERE id = $d}
+
+test "shared with a team: its members, and nobody else"
+  given ann = {INSERT INTO app.users VALUES (901, 'ann') RETURNING id}
+  given bo = {INSERT INTO app.users VALUES (902, 'bo') RETURNING id}
+  given cy = {INSERT INTO app.users VALUES (903, 'cy') RETURNING id}
+  given writers = {INSERT INTO app.teams VALUES (910, 'writers') RETURNING id}
+  given {INSERT INTO app.team_members VALUES ($writers, $bo)}
+  given d = {INSERT INTO app.documents (owner_id, title) VALUES ($ann, 'Plan') RETURNING id}
+  as user $ann allowed {SELECT authz.share('document', $d, 'editor', 'team', $writers, 'member')}
+  user $bo can edit document $d
+  user $cy cannot view document $d
+  given {INSERT INTO app.team_members VALUES ($writers, $cy)}
+  user $cy can edit document $d
