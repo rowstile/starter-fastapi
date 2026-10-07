@@ -1,0 +1,67 @@
+# On every push and pull request: the policy is laid out and has its migration, a fresh database migrates,
+# the policy's tests and the app's tests pass. On a pull request, rowstile also comments what a change to the
+# policy does: who gains or loses access, what to look at twice.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+
+env:
+  ROWSTILE_OWNER_DSN: postgresql://starter_owner:owner@localhost:5432/starter
+  ROWSTILE_OWNER_URL: postgresql+psycopg://starter_owner:owner@localhost:5432/starter
+  ROWSTILE_APP_URL: postgresql+asyncpg://starter_app:app@localhost:5432/starter
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 3s --health-retries 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+      - run: uv sync --frozen
+      # the owner's role and the database, as docker compose makes them
+      - run: psql "postgresql://postgres:postgres@localhost:5432/postgres" -v ON_ERROR_STOP=1 -f docker/init.sql
+      - run: uv run rowstile fmt --check db/policy.authz db/tests/*.authz
+      - run: uv run rowstile migrate --check      # a change to the policy has its migration
+      - run: uv run alembic upgrade head
+      - run: uv run rowstile test
+      - run: uv run alembic check                 # the models and the database agree
+      - run: uv run pytest -q
+
+  # What a pull request's policy change does, as a comment kept up to date. The database it reads is at the
+  # base branch's state: its migrations, with the people the first one makes.
+  review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 3s --health-retries 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@v10
+      - run: psql "postgresql://postgres:postgres@localhost:5432/postgres" -v ON_ERROR_STOP=1 -f docker/init.sql
+      - name: the base branch's migrations
+        run: |
+          git worktree add "$RUNNER_TEMP/base" "${{ github.event.pull_request.base.sha }}"
+          cd "$RUNNER_TEMP/base" && uv sync --frozen && uv run alembic upgrade head
+      - uses: rowstile/rowstile/review-ci/github@v0.1.0-alpha.6
+        with:
+          database-url: ${{ env.ROWSTILE_OWNER_DSN }}

@@ -1,0 +1,8 @@
+policy   = "db/policy.authz"
+tests    = ["db/tests/*.authz"]
+database = "env:ROWSTILE_OWNER_DSN"     # the tables' owner, as a libpq URL
+[clients]
+py = "app/authz_client.py"              # the policy's names, written by rowstile dev and rowstile client
+[migrations]
+tool = "alembic"
+dir  = "migrations/versions"

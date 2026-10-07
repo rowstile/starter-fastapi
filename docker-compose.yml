@@ -1,0 +1,43 @@
+# docker compose up: Postgres, the migrations (the app's tables, then the policy), and the API on
+# http://localhost:8000 (its pages: /docs). The passwords here are for a laptop; change them anywhere else.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      # makes the owner's role and the database, once, when the volume is new
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - db:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"   # 15432 on your machine: a Postgres of your own may hold 5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U starter_owner -d starter"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  # the tables' owner runs the migrations: the app's own, and rowstile's policy among them
+  migrate:
+    build: .
+    command: uv run --no-sync alembic upgrade head
+    environment:
+      ROWSTILE_OWNER_URL: postgresql+psycopg://starter_owner:owner@db/starter
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # the app connects as its own role, which row-level security applies to: never as the owner
+  api:
+    build: .
+    command: uv run --no-sync uvicorn app.main:app --host 0.0.0.0 --port 8000
+    environment:
+      ROWSTILE_APP_URL: postgresql+asyncpg://starter_app:app@db/starter
+    ports:
+      - "8000:8000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  db:
