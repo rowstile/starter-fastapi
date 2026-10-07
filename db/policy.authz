@@ -12,7 +12,7 @@ type document = app.documents
   editor : user, team#member shared  -- given with authz.share(), by whoever may share
   viewer : user, team#member shared
 
-  can share = owner
+  can share = owner or editor
   can edit  = share or editor
   can view  = edit or viewer
 
