@@ -4,8 +4,8 @@ version = "0.0.0"
 description = "A FastAPI app with documents shared between people and teams, its permissions enforced by Postgres through rowstile"
 requires-python = ">=3.11"
 dependencies = [
-  # only alphas are published so far: `>=0.1.0a6` lets uv take rowstile's pre-release, and no other package's
-  "rowstile[fastapi,sqlalchemy,asyncpg,psycopg]>=0.1.0a6",
+  # only alphas are published so far: `>=0.1.0a7` lets uv take rowstile's pre-release, and no other package's
+  "rowstile[fastapi,sqlalchemy,asyncpg,psycopg]>=0.1.0a7",
   "sqlalchemy[asyncio]>=2.0",
   "asyncpg>=0.29",
   "psycopg[binary]>=3.1",
