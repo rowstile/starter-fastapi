@@ -688,11 +688,11 @@ wheels = [
 
 [[package]]
 name = "rowstile"
-version = "0.1.0a7"
+version = "0.1.0a9"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/55/cc/19cd37b3c712e76dbb75ece7fdb076700f9a37654dd4773835cac5790e5b/rowstile-0.1.0a7.tar.gz", hash = "sha256:14b36a43721a8049d9cb2c5104854e945ada6bfb0b79eaa4a2d26cc166855eee", size = 354047, upload-time = "2026-10-13T10:29:52.528Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c3/61/05f8d91071adbed06d22fe6480e42aae3fe9c5138a549bb0a5d2439ce202/rowstile-0.1.0a9.tar.gz", hash = "sha256:6655d22d9e4d233e8364e11f4fec73db1b0b65d0ac9bb85022fcf4efc51937ac", size = 386020, upload-time = "2026-10-19T22:46:27.581Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/50/3f/3a685f0d581494473ccf978f02289abf4808e10c4af27005d013d2cfd874/rowstile-0.1.0a7-py3-none-any.whl", hash = "sha256:f37b581f3e5c34210c45ec57e959cef6f107884026f1aef92ef7f1cae44e011c", size = 382309, upload-time = "2026-10-13T10:29:50.913Z" },
+    { url = "https://files.pythonhosted.org/packages/62/89/7f079e2c254e8c9d42f4780bd23f9d984af26ab2f4192940649de923b42d/rowstile-0.1.0a9-py3-none-any.whl", hash = "sha256:c960db78a49d6375ebb2b28eb2033e8ee4855b6b5ade81d1433d0b9796a7fee9", size = 414606, upload-time = "2026-10-19T22:46:26.081Z" },
 ]
 
 [package.optional-dependencies]
@@ -736,7 +736,7 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.29" },
     { name = "fastapi", specifier = ">=0.110" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.1" },
-    { name = "rowstile", extras = ["fastapi", "sqlalchemy", "asyncpg", "psycopg"], specifier = ">=0.1.0a7" },
+    { name = "rowstile", extras = ["fastapi", "sqlalchemy", "asyncpg", "psycopg"], specifier = ">=0.1.0a9" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0" },
     { name = "uvicorn", specifier = ">=0.30" },
 ]
