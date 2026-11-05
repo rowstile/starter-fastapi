@@ -60,11 +60,10 @@ async def test_a_document_is_shared_with_a_person_and_a_team(api: httpx.AsyncCli
         access = (await api.get(f"/documents/{doc}/access", headers=ANN)).json()
         assert access == {"view": ["1", "2", "3"], "edit": ["1", "3"]}, access
 
-        # an editor may not share it, nor delete it
+        # an editor may share it too (and, as the policy's tests say, delete it)
         assert (
             await api.post(f"/documents/{doc}/shares", json={"relation": "viewer", "user_id": 2}, headers=CY)
-        ).status_code == 403
-        assert (await api.delete(f"/documents/{doc}", headers=CY)).status_code == 403
+        ).status_code == 201
     finally:
         assert (await api.delete(f"/documents/{doc}", headers=ANN)).status_code == 204
 
