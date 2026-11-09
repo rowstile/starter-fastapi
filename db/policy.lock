@@ -8,7 +8,7 @@
 > type document: owner : user = owner_id
 > type document: editor : user, team#member shared
 > type document: viewer : user, team#member shared
-> type document: can share = owner
+> type document: can share = owner or editor
 > type document: can edit = share or editor
 > type document: can view = edit or viewer
 > rules app.documents
@@ -24,7 +24,7 @@ function authz.announce_timed_shares() | d54dfc65af0d shape=73a521b1
 function authz.break_glass(p_type text, p_id bigint, p_relation text, p_reason text, p_duration interval) | ade6dbb78b04 shape=70a253d5
 function authz.break_glass(p_type text, p_id text, p_relation text, p_reason text, p_duration interval) | ff3dc82d6ec2 shape=77f3e79f
 function authz.can(p_type text, p_id bigint, p_perm text) | 3b89f3888983 shape=a0df7b00
-function authz.can(p_type text, p_id text, p_perm text) | 521f24cebcf6 shape=220bc89f
+function authz.can(p_type text, p_id text, p_perm text) | 19585686eeb3 shape=220bc89f
 function authz.cancel_request(p_id bigint) | 14f17f222d45 shape=19aa0bb3
 function authz.changes_position() | 5df1d41ccaab shape=515e7531
 function authz.changes_since(p_pos bigint, p_limit int) | d421b775ac32 shape=0448ffba
@@ -42,7 +42,7 @@ function authz.explain(p_type text, p_id bigint, p_perm text, p_user text) | e9f
 function authz.explain(p_type text, p_id text, p_perm text, p_user text) | 40404a01a519 shape=7d6de14b
 function authz.explain_rule(p_table text, p_command text, p_id text, p_row jsonb) | 30876058b7a9 shape=1223ad2f
 function authz.lint() | b64d989bda1b shape=54cb1505
-function authz.list(p_type text, p_perm text, p_after text, p_limit int) | ae83f9899328 shape=e713a7cc
+function authz.list(p_type text, p_perm text, p_after text, p_limit int) | 69261f4359d5 shape=e713a7cc
 function authz.list_api_keys(p_principal_type text, p_principal_id text) | d655dcfce01d shape=04dcffde
 function authz.list_links(p_type text, p_id bigint) | 740da2e3c91e shape=594bc19e
 function authz.list_links(p_type text, p_id text) | a2d91074fb5c shape=a74ce96d
@@ -89,7 +89,7 @@ function authz.who_among(p_type text, p_id bigint, p_perm text, p_users text[], 
 function authz.who_among(p_type text, p_id text, p_perm text, p_users text[], p_principal_type text) | 3051f8f59667 shape=17b9de43
 function authz_gen."app.documents:column owner_id:items"(p_row "app"."documents") | b28d8aedca22 shape=5ff7a80c atomic
 function authz_gen."app.documents:column owner_id:why"(p_row "app"."documents") | cb3a2bd74a9a shape=f5d2219f
-function authz_gen."app.documents:delete:items"(p_row "app"."documents") | e1b4c653d08b shape=04a9783d atomic
+function authz_gen."app.documents:delete:items"(p_row "app"."documents") | 3cc5803742ea shape=04a9783d atomic
 function authz_gen."app.documents:delete:why"(p_row "app"."documents") | 56827582955a shape=30fd688d
 function authz_gen."app.documents:insert:items"(p_row "app"."documents") | eb661b58ef34 shape=ba253098 atomic
 function authz_gen."app.documents:insert:refuse"(p_row "app"."documents") | 88c5a46f6454 shape=fb63fc65
@@ -115,8 +115,8 @@ function authz_int."document__forget_all"() | 31722d6551d9 shape=c0e08908
 function authz_int."document__forget_id"() | 350774adbe11 shape=4b899423
 function authz_int."document__owner__who"(p_id bigint) | ecb24e57d935 shape=5e1dd53c
 function authz_int."document__owner__why"(p_id bigint, p_depth int, p_seen text[], p_asker text[]) | 39a19c40e8a1 shape=5cc73288
-function authz_int."document__share__who"(p_id bigint) | 83586ae00c81 shape=9a71f097
-function authz_int."document__share__why"(p_id bigint, p_depth int, p_seen text[], p_asker text[]) | c0307cf81c29 shape=3762a189
+function authz_int."document__share__who"(p_id bigint) | b74694a749b0 shape=9a71f097
+function authz_int."document__share__why"(p_id bigint, p_depth int, p_seen text[], p_asker text[]) | 2320643063a0 shape=3762a189
 function authz_int."document__view__who"(p_id bigint) | 533b8e3d64fa shape=c4ed0faf
 function authz_int."document__view__why"(p_id bigint, p_depth int, p_seen text[], p_asker text[]) | 49de1684d6b9 shape=10f2043d
 function authz_int."document__viewer__who"(p_id bigint) | f6d4f6dffaaa shape=03c60cfe
@@ -153,7 +153,7 @@ function authz_int.audit_is_append_only() | 8c5ce299a394 shape=6d19848d
 function authz_int.b64url(p text) | 5692fc0b5c1e shape=17f0c842
 function authz_int.caller_is_admin() | 33a690b7bfd1 shape=268ddaf7
 function authz_int.caller_role() | f21245c06777 shape=96997846
-function authz_int.can(p_type text, p_id text, p_perm text) | 7331fe1b06c7 shape=ab126b5f
+function authz_int.can(p_type text, p_id text, p_perm text) | d077b6f19300 shape=ab126b5f
 function authz_int.canon(p_type text, p_id text) | a4d16caecd67 shape=ab774d8a
 function authz_int.changed(p_type text, p_ids text[], p_cause text) | a711a89ca6d9 shape=7a5b1adc
 function authz_int.check_manage_keys(p_type text, p_id text) | 5c1c44f7a9a5 shape=391727a0
@@ -197,7 +197,7 @@ function authz_int.truncate_once(p_relid oid, p_key text, p_before boolean) | b8
 function authz_int.users_only(p_what text) | 51a4de66a12e shape=89b5b973
 function authz_int.visible(p_type text, p_id text) | 5f0b8f80a5fc shape=e14964bd
 function authz_int.writable() | dce4bbfe1638 shape=2260a03a
-policy "authz_delete" ON "app"."documents" | f1a199e7d6a9
+policy "authz_delete" ON "app"."documents" | bd021c30a712
 policy "authz_insert" ON "app"."documents" | ce7968892435
 policy "authz_select" ON "app"."documents" | c6c002eabb76
 policy "authz_update" ON "app"."documents" | 9bd2beb6caac
@@ -223,7 +223,7 @@ table authz_int.role_subjects | 0abfdc400757 shape=0abfdc40
 table authz_int.row_marks | 2ed0525ef2fa shape=2ed0525e
 table authz_int.scope_items | 37f4db5fc367 shape=66a4763a
 table authz_int.session_key | f99b8771bebc shape=48b1cfb2
-table authz_int.shared_relations | 6f038e365630 shape=c57707aa
+table authz_int.shared_relations | 733f246442f9 shape=c57707aa
 table authz_int.trees | 02db6ec72102 shape=02db6ec7
 table authz_int.truncating | 92fc3b758bf4 shape=92fc3b75
 table authz_int.types | b8ae1f72f558 shape=b6d5b497
@@ -283,7 +283,7 @@ trigger authz_shares_canon ON authz.shares | 01de580f7b5b
 view authz_int."document__edit" | a18f5d68326c
 view authz_int."document__editor" | 85c4518e1dc3
 view authz_int."document__owner" | c4d80ce253d7
-view authz_int."document__share" | 19fed7942d04
+view authz_int."document__share" | 1037830e1ea1
 view authz_int."document__view" | c4dd5986665c
 view authz_int."document__viewer" | 2d8100c1176d
 view authz_int."team__member" | 093a76406264

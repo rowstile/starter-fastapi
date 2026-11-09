@@ -19,9 +19,9 @@ test "shared with a person: a viewer reads, an editor writes"
   as user $bo refused {UPDATE app.documents SET title = 'mine' WHERE id = $d}
   as user $ann allowed {SELECT authz.share('document', $d, 'editor', 'user', $bo)}
   as user $bo allowed {UPDATE app.documents SET title = 'ours' WHERE id = $d}
-  as user $bo refused {SELECT authz.share('document', $d, 'viewer', 'user', $bo)}
-  as user $bo refused {DELETE FROM app.documents WHERE id = $d}
+  as user $bo allowed {SELECT authz.share('document', $d, 'viewer', 'user', $bo)}
   as user $bo refused {UPDATE app.documents SET owner_id = $bo WHERE id = $d}
+  as user $bo allowed {DELETE FROM app.documents WHERE id = $d}
 
 test "shared with a team: its members, and nobody else"
   given ann = {INSERT INTO app.users VALUES (901, 'ann') RETURNING id}
